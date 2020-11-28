@@ -22,11 +22,8 @@ mongoose.connect(connection_url, {
 });
 
 // API endpoints
-app.get("/", (req, res) => {
-  res.status(200).send("hello world");
-});
-
 app.post("/register", userRequests.registerUser);
+app.post("/login", userRequests.loginUser);
 
 app.get("/users", (req, res) => {
   User.find((error, data) => {
