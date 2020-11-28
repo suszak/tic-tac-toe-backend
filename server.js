@@ -2,7 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import Cors from "cors";
 import User from "./models/dbUser.js";
-import { dbPassword } from "./private/dbPassword";
+import { dbPassword } from "./private/dbPassword.js";
+import * as userRequests from "./requests/userRequests.js";
 
 // App config
 const app = express();
@@ -25,17 +26,7 @@ app.get("/", (req, res) => {
   res.status(200).send("hello world");
 });
 
-app.post("/users", (req, res) => {
-  const dbUser = req.body;
-
-  User.create(dbUser, (error, data) => {
-    if (error) {
-      response.status(500).send(error);
-    } else {
-      res.status(201).send(data);
-    }
-  });
-});
+app.post("/register", userRequests.registerUser);
 
 app.get("/users", (req, res) => {
   User.find((error, data) => {
@@ -49,7 +40,5 @@ app.get("/users", (req, res) => {
 
 // Listener
 app.listen(port, () => {
-  console.log(`listening on localhost: ${port}`);
+  console.log("Server started!");
 });
-
-// DbkC78tfxmrNoE5m
