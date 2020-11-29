@@ -23,7 +23,7 @@ mongoose.connect(connection_url, {
 
 // API endpoints
 app.get("/", (req, res) => {
-  res.status(200).send("I'm up");
+  res.send("I'm up");
 });
 
 app.post("/register", userRequests.registerUser);
@@ -32,9 +32,9 @@ app.post("/login", userRequests.loginUser);
 app.get("/users", (req, res) => {
   User.find((error, data) => {
     if (error) {
-      res.status(500).send(error);
+      res.send(error);
     } else {
-      res.status(200).send(data);
+      res.send(data);
     }
   });
 });

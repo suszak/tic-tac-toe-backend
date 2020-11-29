@@ -7,9 +7,7 @@ export const registerUser = (req, res) => {
   if (userLogin && userPassword) {
     User.countDocuments({ login: userLogin }).then((count) => {
       if (count != 0) {
-        res
-          .status(500)
-          .send({ registered: false, error: "user already exist!" });
+        res.send({ registered: false, error: "User already exist!" });
       } else {
         User.create({
           login: userLogin,
@@ -17,14 +15,14 @@ export const registerUser = (req, res) => {
           rankPoints: 0,
           isAdmin: false,
         }).then(() => {
-          res.status(201).send({
+          res.send({
             registered: true,
           });
         });
       }
     });
   } else {
-    res.status(500).send({ registered: false, error: "Wrong input data!" });
+    res.send({ registered: false, error: "Wrong input data!" });
   }
 };
 
@@ -36,17 +34,15 @@ export const loginUser = (req, res) => {
     User.find({ login: userLogin }).then((userFound) => {
       if (userFound.length === 1) {
         if (userFound[0].password === userPassword) {
-          res.status(200).send({ logged: true, userLogin: userLogin });
+          res.send({ logged: true, userLogin: userLogin });
         } else {
-          res
-            .status(200)
-            .send({ logged: false, error: "Passwords doesn't match!" });
+          res.send({ logged: false, error: "Passwords doesn't match!" });
         }
       } else {
-        res.status(200).send({ logged: false, error: "User not found!" });
+        res.send({ logged: false, error: "User not found!" });
       }
     });
   } else {
-    res.status(500).send({ logged: false, error: "Wrong input data!" });
+    res.send({ logged: false, error: "Wrong input data!" });
   }
 };
