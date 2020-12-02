@@ -46,3 +46,15 @@ export const loginUser = (req, res) => {
     res.send({ logged: false, error: "Wrong input data!" });
   }
 };
+
+export const getTop5Users = (req, res) => {
+  User.find((error, data) => {
+    if (error) {
+      res.send({ error: error });
+    } else {
+      res.send({ data: data });
+    }
+  })
+    .sort({ rankPoints: -1 })
+    .limit(5);
+};

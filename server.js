@@ -28,6 +28,7 @@ app.get("/", (req, res) => {
 
 app.post("/register", userRequests.registerUser);
 app.post("/login", userRequests.loginUser);
+app.get("/topUsers", userRequests.getTop5Users);
 
 app.get("/users", (req, res) => {
   User.find((error, data) => {
