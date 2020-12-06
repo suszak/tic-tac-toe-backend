@@ -58,3 +58,15 @@ export const getTop5Users = (req, res) => {
     .sort({ rankPoints: -1 })
     .limit(5);
 };
+
+export const getUserRank = (req, res) => {
+  const userLogin = req.body.login;
+
+  if (userLogin) {
+    User.find({ login: userLogin }).then((userFound) => {
+      res.send({ rankPoints: userFound[0].rankPoints });
+    });
+  } else {
+    res.send({ error: "Bad input data!" });
+  }
+};
