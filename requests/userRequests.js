@@ -34,7 +34,11 @@ export const loginUser = (req, res) => {
     User.find({ login: userLogin }).then((userFound) => {
       if (userFound.length === 1) {
         if (userFound[0].password === userPassword) {
-          res.send({ logged: true, userLogin: userLogin });
+          res.send({
+            logged: true,
+            userLogin: userLogin,
+            isAdmin: userFound[0].isAdmin,
+          });
         } else {
           res.send({ logged: false, error: "Passwords doesn't match!" });
         }
