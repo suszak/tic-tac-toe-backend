@@ -29,7 +29,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT"],
   },
 });
 
@@ -37,8 +37,8 @@ io.on("connection", (socket) => {
   const { room } = socket.handshake.query;
   socket.join(room);
 
-  socket.on("tablesUpdated", (tables) => {
-    io.to(room).emit("tablesUpdated", tables);
+  socket.on("tablesUpdated", (data) => {
+    io.to(room).emit("tablesUpdated", data);
   });
 
   socket.on("disconnect", () => {
@@ -63,3 +63,4 @@ app.post("/userRank", userRequests.getUserRank);
 // TableOverview
 // app.post("/addTable", tableOverview.addTable);
 app.get("/getTables", tableOverview.getTables);
+app.put("/updateTables", tableOverview.updateTables);

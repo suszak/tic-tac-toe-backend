@@ -33,3 +33,33 @@ export const getTables = (req, res) => {
     }
   });
 };
+
+export const updateTables = async (req, res) => {
+  if (req.body.userNumber == 1) {
+    try {
+      await TableOverview.updateOne(
+        { id: req.body.tableID },
+        { $set: { user1: req.body.userName } }
+      );
+    } catch (e) {
+      res.send({ updated: false, error: e });
+    }
+    res.send({
+      updated: true,
+    });
+  } else if (req.body.userNumber == 2) {
+    try {
+      await TableOverview.updateOne(
+        { id: req.body.tableID },
+        { $set: { user2: req.body.userName } }
+      );
+    } catch (e) {
+      res.send({ updated: false, error: e });
+    }
+    res.send({
+      updated: true,
+    });
+  } else {
+    res.send({ updated: false });
+  }
+};
