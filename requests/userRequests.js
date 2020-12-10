@@ -74,3 +74,17 @@ export const getUserRank = (req, res) => {
     res.send({ error: "Bad input data!" });
   }
 };
+
+export const getAdminStatus = (req, res) => {
+  if (req.body.userName) {
+    User.find({ login: req.body.userName }).then((userFound) => {
+      if (userFound.length > 0) {
+        res.send({ isAdmin: userFound[0].isAdmin });
+      } else {
+        res.send({ error: "User not found!" });
+      }
+    });
+  } else {
+    res.send({ error: "Bad input data!" });
+  }
+};

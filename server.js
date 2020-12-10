@@ -55,10 +55,12 @@ app.get("/", (req, res) => {
   res.send("Server is up");
 });
 
+// User
 app.post("/register", userRequests.registerUser);
 app.post("/login", userRequests.loginUser);
 app.get("/topUsers", userRequests.getTop5Users);
 app.post("/userRank", userRequests.getUserRank);
+app.post("/getAdminStatus", userRequests.getAdminStatus);
 
 // TableOverview
 // app.post("/addTable", tableOverview.addTable);
