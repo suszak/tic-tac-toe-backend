@@ -104,3 +104,57 @@ export const getUsers = (req, res) => {
     }
   });
 };
+
+export const changeAdminStatus = async (req, res) => {
+  let response = "";
+  try {
+    await User.updateOne(
+      { login: req.body.userLogin },
+      { $set: { isAdmin: req.body.isAdmin } }
+    );
+  } catch (err) {
+    response = { updated: false, error: err };
+  } finally {
+    if (!response) {
+      response = {
+        updated: true,
+      };
+    }
+    res.send(response);
+  }
+};
+
+export const changePassword = async (req, res) => {
+  let response = "";
+  try {
+    await User.updateOne(
+      { login: req.body.userLogin },
+      { $set: { password: req.body.newPassword } }
+    );
+  } catch (err) {
+    response = { updated: false, error: err };
+  } finally {
+    if (!response) {
+      response = {
+        updated: true,
+      };
+    }
+    res.send(response);
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  let response = "";
+  try {
+    await User.deleteOne({ login: req.body.userLogin });
+  } catch (err) {
+    response = { deleted: false, error: err };
+  } finally {
+    if (!response) {
+      response = {
+        deleted: true,
+      };
+    }
+    res.send(response);
+  }
+};

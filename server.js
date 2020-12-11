@@ -62,6 +62,9 @@ app.get("/topUsers", userRequests.getTop5Users);
 app.post("/userRank", userRequests.getUserRank);
 app.post("/getAdminStatus", userRequests.getAdminStatus);
 app.get("/getUsers", userRequests.getUsers);
+app.put("/changeAdminStatus", userRequests.changeAdminStatus);
+app.put("/changePassword", userRequests.changePassword);
+app.put("/deleteUser", userRequests.deleteUser);
 
 // TableOverview
 // app.post("/addTable", tableOverview.addTable);
