@@ -61,6 +61,7 @@ app.post("/login", userRequests.loginUser);
 app.get("/topUsers", userRequests.getTop5Users);
 app.post("/userRank", userRequests.getUserRank);
 app.post("/getAdminStatus", userRequests.getAdminStatus);
+app.get("/getUsers", userRequests.getUsers);
 
 // TableOverview
 // app.post("/addTable", tableOverview.addTable);

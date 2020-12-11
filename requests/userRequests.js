@@ -88,3 +88,19 @@ export const getAdminStatus = (req, res) => {
     res.send({ error: "Bad input data!" });
   }
 };
+
+export const getUsers = (req, res) => {
+  User.find((error, data) => {
+    if (error) {
+      res.send({ error: error });
+    } else {
+      const usersOverview = data.map((user) => {
+        return {
+          login: user.login,
+          isAdmin: user.isAdmin,
+        };
+      });
+      res.send(usersOverview);
+    }
+  });
+};
