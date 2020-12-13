@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import { dbPassword } from "./private/dbPassword.js";
 import * as userRequests from "./requests/userRequests.js";
 import * as tableOverview from "./requests/tablesRequests.js";
+import { axiosDisconnectUserFromDB } from "./axios.js";
 
 // App config
 const app = express();
@@ -26,6 +27,7 @@ mongoose.connect(connection_url, {
 
 // Socket.io
 const httpServer = createServer(app);
+let clients = {};
 const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:3000",
@@ -34,6 +36,8 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
+  clients[socket.id] = socket;
+
   const { room } = socket.handshake.query;
   socket.join(room);
 
@@ -41,8 +45,37 @@ io.on("connection", (socket) => {
     io.to(room).emit("tablesUpdated", data);
   });
 
+  // socket.on("userDisconnected", () => {
+  //   io.to("tables").emit("userDisconnected");
+  // });
+
+  // game table 1 section
+  socket.on("joinTable1", () => {
+    socket.join("table1");
+  });
+
+  socket.on("changedTable1", (data) => {
+    io.to("table1").emit("changedTable1", data);
+  });
+
+  socket.on("logout", () => {
+    socket.disconnect();
+  });
+
   socket.on("disconnect", () => {
-    socket.leave(room);
+    axiosDisconnectUserFromDB(clients[socket.id].handshake.headers.login).then(
+      (response) => {
+        if (response.data.updated) {
+          io.to("tables").emit("userDisconnected");
+        }
+      }
+    );
+
+    delete clients[socket.id];
+
+    socket.rooms.forEach((el) => {
+      socket.leave(el);
+    });
   });
 });
 
@@ -70,3 +103,4 @@ app.put("/deleteUser", userRequests.deleteUser);
 // app.post("/addTable", tableOverview.addTable);
 app.get("/getTables", tableOverview.getTables);
 app.put("/updateTables", tableOverview.updateTables);
+app.put("/disconnectUser", tableOverview.disconnectUserFromTable);

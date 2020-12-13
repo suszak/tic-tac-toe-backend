@@ -63,3 +63,21 @@ export const updateTables = async (req, res) => {
     res.send({ updated: false });
   }
 };
+
+export const disconnectUserFromTable = async (req, res) => {
+  const userName = req.body.userName;
+  let response = "";
+  try {
+    await TableOverview.updateOne({ user1: userName }, { $set: { user1: "" } });
+    await TableOverview.updateOne({ user2: userName }, { $set: { user2: "" } });
+  } catch (err) {
+    response = { updated: false, error: err };
+  } finally {
+    if (!response) {
+      response = {
+        updated: true,
+      };
+    }
+    res.send(response);
+  }
+};
