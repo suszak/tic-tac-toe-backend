@@ -12,6 +12,8 @@ export const addTable = (req, res) => {
           id: newId,
           user1: "",
           user2: "",
+          user1RankPoints: 0,
+          user2RankPoints: 0,
         }).then(() => {
           res.send({
             tableAdded: true,
@@ -39,7 +41,12 @@ export const updateTables = async (req, res) => {
     try {
       await TableOverview.updateOne(
         { id: req.body.tableID },
-        { $set: { user1: req.body.userName } }
+        {
+          $set: {
+            user1: req.body.userName,
+            user1RankPoints: req.body.rankPoints,
+          },
+        }
       );
     } catch (e) {
       res.send({ updated: false, error: e });
@@ -51,7 +58,12 @@ export const updateTables = async (req, res) => {
     try {
       await TableOverview.updateOne(
         { id: req.body.tableID },
-        { $set: { user2: req.body.userName } }
+        {
+          $set: {
+            user2: req.body.userName,
+            user2RankPoints: req.body.rankPoints,
+          },
+        }
       );
     } catch (e) {
       res.send({ updated: false, error: e });
@@ -68,8 +80,14 @@ export const disconnectUserFromTable = async (req, res) => {
   const userName = req.body.userName;
   let response = "";
   try {
-    await TableOverview.updateOne({ user1: userName }, { $set: { user1: "" } });
-    await TableOverview.updateOne({ user2: userName }, { $set: { user2: "" } });
+    await TableOverview.updateOne(
+      { user1: userName },
+      { $set: { user1: "", user1RankPoints: 0 } }
+    );
+    await TableOverview.updateOne(
+      { user2: userName },
+      { $set: { user2: "", user2RankPoints: 0 } }
+    );
   } catch (err) {
     response = { updated: false, error: err };
   } finally {

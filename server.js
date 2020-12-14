@@ -45,10 +45,6 @@ io.on("connection", (socket) => {
     io.to(room).emit("tablesUpdated", data);
   });
 
-  // socket.on("userDisconnected", () => {
-  //   io.to("tables").emit("userDisconnected");
-  // });
-
   // game table 1 section
   socket.on("joinTable1", () => {
     socket.join("table1");
