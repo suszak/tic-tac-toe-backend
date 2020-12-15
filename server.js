@@ -45,13 +45,29 @@ io.on("connection", (socket) => {
     io.to(room).emit("tablesUpdated", data);
   });
 
-  // game table 1 section
-  socket.on("joinTable1", () => {
-    socket.join("table1");
+  // game table section
+  socket.on("joinGame", (data) => {
+    socket.join(data.room);
   });
 
-  socket.on("changedTable1", (data) => {
-    io.to("table1").emit("changedTable1", data);
+  socket.on("newTurn", (data) => {
+    io.to(data.room).emit("newTurn", data.turn);
+  });
+
+  socket.on("tableChanged", (data) => {
+    io.to(data.room).emit("tableChanged", data);
+  });
+
+  socket.on("leaveTable", (data) => {
+    axiosDisconnectUserFromDB(clients[socket.id].handshake.headers.login).then(
+      (response) => {
+        if (response.data.updated) {
+          io.to("tables").emit("userDisconnected");
+        }
+      }
+    );
+
+    socket.leave(data.room);
   });
 
   socket.on("logout", () => {
