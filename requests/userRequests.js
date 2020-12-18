@@ -143,6 +143,25 @@ export const changePassword = async (req, res) => {
   }
 };
 
+export const updatePoints = async (req, res) => {
+  let response = "";
+  try {
+    await User.updateOne(
+      { login: req.body.userLogin },
+      { $set: { rankPoints: req.body.newPoints } }
+    );
+  } catch (err) {
+    response = { updated: false, error: err };
+  } finally {
+    if (!response) {
+      response = {
+        updated: true,
+      };
+    }
+    res.send(response);
+  }
+};
+
 export const deleteUser = async (req, res) => {
   let response = "";
   try {

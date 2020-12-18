@@ -99,3 +99,33 @@ export const disconnectUserFromTable = async (req, res) => {
     res.send(response);
   }
 };
+
+export const updateTablesPoints = async (req, res) => {
+  const userName = req.body.userName;
+  const rankPoints = req.body.rankPoints;
+  let response = "";
+
+  try {
+    await TableOverview.updateOne(
+      {
+        user1: userName,
+      },
+      { $set: { user1RankPoints: rankPoints } }
+    );
+    await TableOverview.updateOne(
+      {
+        user2: userName,
+      },
+      { $set: { user2RankPoints: rankPoints } }
+    );
+  } catch (err) {
+    response = { updated: false, error: err };
+  } finally {
+    if (!response) {
+      response = {
+        updated: true,
+      };
+      res.send(response);
+    }
+  }
+};

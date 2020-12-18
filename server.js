@@ -6,11 +6,16 @@ import { Server } from "socket.io";
 import { dbPassword } from "./private/dbPassword.js";
 import * as userRequests from "./requests/userRequests.js";
 import * as tableOverview from "./requests/tablesRequests.js";
-import { axiosDisconnectUserFromDB } from "./axios.js";
+import {
+  axiosDisconnectUserFromDB,
+  axiosUpdatePoints,
+  axiosUpdateTablesPoints,
+} from "./axios.js";
+import { calculatePoints } from "./helpers/calculatePoints.js";
 
 // App config
 const app = express();
-const port = process.env.PORT || 8001;
+const port = process.env.PORT || 8002;
 const connection_url = `mongodb+srv://admin:${dbPassword}@cluster0.bdw2n.mongodb.net/TIC-TAC-TOE?retryWrites=true&w=majority`;
 
 // Middleware
@@ -48,14 +53,42 @@ io.on("connection", (socket) => {
   // game table section
   socket.on("joinGame", (data) => {
     socket.join(data.room);
+    socket.to(data.room).emit("userJoined");
   });
 
   socket.on("newTurn", (data) => {
-    io.to(data.room).emit("newTurn", data.turn);
+    io.to(data.room).emit("newTurn", {
+      gameTable: data.gameTable,
+      newTurn: data.turn,
+    });
   });
 
-  socket.on("tableChanged", (data) => {
-    io.to(data.room).emit("tableChanged", data);
+  socket.on("gameEnded", (data) => {
+    const newData = calculatePoints(data);
+    axiosUpdatePoints(data.winner, newData.newWinnerPoints).then((response) => {
+      if (response.data.updated) {
+        io.to("tables").emit("tableChanged");
+      }
+    });
+    axiosUpdateTablesPoints(data.winner, newData.newWinnerPoints).then(
+      (response) => {
+        if (response.data.updated) {
+          io.to("tables").emit("tableChanged");
+        }
+      }
+    );
+    axiosUpdatePoints(data.loser, newData.newLoserPoints).then((response) => {
+      if (response.data.updated) {
+        io.to("tables").emit("tableChanged");
+      }
+    });
+    axiosUpdateTablesPoints(data.loser, newData.newLoserPoints).then(
+      (response) => {
+        if (response.data.updated) {
+          io.to("tables").emit("tableChanged");
+        }
+      }
+    );
   });
 
   socket.on("leaveTable", (data) => {
@@ -110,9 +143,11 @@ app.get("/getUsers", userRequests.getUsers);
 app.put("/changeAdminStatus", userRequests.changeAdminStatus);
 app.put("/changePassword", userRequests.changePassword);
 app.put("/deleteUser", userRequests.deleteUser);
+app.put("/updatePoints", userRequests.updatePoints);
 
 // TableOverview
 // app.post("/addTable", tableOverview.addTable);
 app.get("/getTables", tableOverview.getTables);
 app.put("/updateTables", tableOverview.updateTables);
 app.put("/disconnectUser", tableOverview.disconnectUserFromTable);
+app.put("/updateTablesPoints", tableOverview.updateTablesPoints);
