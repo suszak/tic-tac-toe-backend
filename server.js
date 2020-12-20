@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import path from "path";
 import Cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -17,6 +18,7 @@ import { calculatePoints } from "./helpers/calculatePoints.js";
 const app = express();
 const port = process.env.PORT || 8002;
 const connection_url = `mongodb+srv://admin:${dbPassword}@cluster0.bdw2n.mongodb.net/TIC-TAC-TOE?retryWrites=true&w=majority`;
+app.use(express.static(path.join(path.resolve(), 'build')))
 
 // Middleware
 app.use(express.json());
@@ -129,9 +131,9 @@ httpServer.listen(port, () => {
 });
 
 // API endpoints
-app.get("/", (req, res) => {
-  res.send("Server is up");
-});
+app.get('/', (req, res) => {
+  res.sendFile(path.join(path.resolve(), 'build', 'index.html'))
+})
 
 // User
 app.post("/register", userRequests.registerUser);
