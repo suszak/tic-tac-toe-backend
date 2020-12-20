@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://pai-tic-tac-toe.herokuapp.com/",
+  baseURL: "http://localhost:8002",
 });
 
 export const axiosDisconnectUserFromDB = async (userName) => {
