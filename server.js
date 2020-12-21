@@ -37,7 +37,8 @@ const httpServer = createServer(app);
 let clients = {};
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://pai-tic-tac-toe.herokuapp.com/",
+    origin: "http://localhost:3000",
+    // origin: "https://pai-tic-tac-toe.herokuapp.com/",
     methods: ["GET", "POST", "PUT"],
   },
 });
