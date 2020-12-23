@@ -18,7 +18,7 @@ import { calculatePoints } from "./helpers/calculatePoints.js";
 const app = express();
 const port = process.env.PORT || 8002;
 const connection_url = `mongodb+srv://admin:${dbPassword}@cluster0.bdw2n.mongodb.net/TIC-TAC-TOE?retryWrites=true&w=majority`;
-app.use(express.static(path.join(path.resolve(), 'build')))
+// app.use(express.static(path.join(path.resolve(), 'build')));
 
 // Middleware
 app.use(express.json());
@@ -46,64 +46,48 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   clients[socket.id] = socket;
 
-  const { room } = socket.handshake.query;
-  socket.join(room);
-
-  socket.on("tablesUpdated", (data) => {
-    io.to(room).emit("tablesUpdated", data);
+  socket.on("tablesUpdate", (data) => {
+    io.emit("tablesUpdated", data);
   });
 
   // game table section
   socket.on("joinGame", (data) => {
-    socket.join(data.room);
-    socket.to(data.room).emit("userJoined");
+    socket.broadcast.emit("userJoined", data);
   });
 
-  socket.on("newTurn", (data) => {
-    io.to(data.room).emit("newTurn", {
+  socket.on("newTurnInc", (data) => {
+    socket.broadcast.emit("newTurn", {
       gameTable: data.gameTable,
       newTurn: data.turn,
+      room: data.room,
     });
   });
 
   socket.on("gameEnded", (data) => {
     const newData = calculatePoints(data);
-    axiosUpdatePoints(data.winner, newData.newWinnerPoints).then((response) => {
-      if (response.data.updated) {
-        io.to("tables").emit("tableChanged");
-      }
+
+    Promise.all([
+      axiosUpdatePoints(data.winner, newData.newWinnerPoints),
+      axiosUpdateTablesPoints(data.winner, newData.newWinnerPoints),
+      axiosUpdatePoints(data.loser, newData.newLoserPoints),
+      axiosUpdateTablesPoints(data.loser, newData.newLoserPoints),
+    ]).then((responses) => {
+      io.emit("tablesRefreshed");
     });
-    axiosUpdateTablesPoints(data.winner, newData.newWinnerPoints).then(
-      (response) => {
-        if (response.data.updated) {
-          io.to("tables").emit("tableChanged");
-        }
-      }
-    );
-    axiosUpdatePoints(data.loser, newData.newLoserPoints).then((response) => {
-      if (response.data.updated) {
-        io.to("tables").emit("tableChanged");
-      }
-    });
-    axiosUpdateTablesPoints(data.loser, newData.newLoserPoints).then(
-      (response) => {
-        if (response.data.updated) {
-          io.to("tables").emit("tableChanged");
-        }
-      }
-    );
   });
 
-  socket.on("leaveTable", (data) => {
+  socket.on("wannaPlayAgain", (data) => {
+    socket.broadcast.emit("playAgain", data);
+  });
+
+  socket.on("leaveTable", () => {
     axiosDisconnectUserFromDB(clients[socket.id].handshake.headers.login).then(
       (response) => {
         if (response.data.updated) {
-          io.to("tables").emit("userDisconnected");
+          io.emit("tablesRefreshed");
         }
       }
     );
-
-    socket.leave(data.room);
   });
 
   socket.on("logout", () => {
@@ -114,7 +98,7 @@ io.on("connection", (socket) => {
     axiosDisconnectUserFromDB(clients[socket.id].handshake.headers.login).then(
       (response) => {
         if (response.data.updated) {
-          io.to("tables").emit("userDisconnected");
+          io.emit("tablesRefreshed");
         }
       }
     );
@@ -132,9 +116,9 @@ httpServer.listen(port, () => {
 });
 
 // API endpoints
-app.get('/', (req, res) => {
-  res.sendFile(path.join(path.resolve(), 'build', 'index.html'))
-})
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(path.resolve(), 'build', 'index.html'))
+// })
 
 // User
 app.post("/register", userRequests.registerUser);
